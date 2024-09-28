@@ -6,6 +6,7 @@ import { InboxOutlined } from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import { setFlights } from '../redux/flightSlice';
 import { FlightData } from '../types/FlightData';
+import { CSVRow } from '../types/FlightData';
 
 const { Dragger } = Upload;
 
@@ -88,7 +89,6 @@ export default function FileUpload() {
   );
 }
 
-type CSVRow = { [key: string]: string };
 
 function parseCSV(csv: string): CSVRow[] {
   const lines: string[] = csv.split('\n');

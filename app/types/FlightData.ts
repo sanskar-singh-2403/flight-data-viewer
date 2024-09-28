@@ -23,3 +23,5 @@ export interface FlightData {
     country: string;
     city: string;
   }
+
+export type CSVRow = { [key: string]: string };
