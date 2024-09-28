@@ -36,7 +36,6 @@ const flightSlice = createSlice({
     }>) => {
       const { criteria, isAdvanced, simpleTerm } = action.payload;
       
-      // sarching based on full text or individual fields
       if (isAdvanced) {
         state.filteredFlights = state.flights.filter(flight =>
           criteria.every(({ field, value }) =>

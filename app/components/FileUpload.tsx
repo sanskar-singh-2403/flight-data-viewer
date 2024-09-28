@@ -9,7 +9,6 @@ import { FlightData } from '../types/FlightData';
 
 const { Dragger } = Upload;
 
-// Helper function to validate if an object conforms to FlightData interface
 function isValidFlightData(obj: unknown): obj is FlightData {
   if (typeof obj !== 'object' || obj === null) {
     return false;
@@ -48,13 +47,14 @@ export default function FileUpload() {
           let data: unknown;
           if (file.name.endsWith('.json')) {
             data = JSON.parse(e.target?.result as string);
+            // console.log(data);
           } else if (file.name.endsWith('.csv')) {
             data = parseCSV(e.target?.result as string);
+            // console.log(data);
           } else {
             throw new Error('Unsupported file type');
           }
 
-          // Validate the data
           if (!Array.isArray(data) || !data.every(isValidFlightData)) {
             throw new Error('Invalid data format');
           }
@@ -80,22 +80,30 @@ export default function FileUpload() {
       <p className="ant-upload-drag-icon">
         <InboxOutlined />
       </p>
-      <p className="ant-upload-text">Click or drag file to this area to upload</p>
+      <p className="ant-upload-text">Click or drag & drop a file to this area to upload</p>
       <p className="ant-upload-hint">
-        Upload a JSON or CSV file containing flight data. Ensure all required fields are present.
+        Upload a JSON or CSV file containing flight data.
       </p>
     </Dragger>
   );
 }
 
-function parseCSV(csv: string): unknown[] {
-  const lines = csv.split('\n');
-  const headers = lines[0].split(',');
-  return lines.slice(1).map(line => {
-    const values = line.split(',');
-    return headers.reduce((obj: Record<string, string>, header, index) => {
-      obj[header.trim()] = values[index]?.trim() ?? '';
-      return obj;
-    }, {});
-  });
+type CSVRow = { [key: string]: string };
+
+function parseCSV(csv: string): CSVRow[] {
+  const lines: string[] = csv.split('\n');
+  const headers: string[] = lines[0].split(',').map(header => header.trim());
+  const result: CSVRow[] = [];
+
+  for (let i: number = 1; i < lines.length; i++) {
+    const values: string[] = lines[i].split(',');
+    const obj: CSVRow = {};
+    for (let j: number = 0; j < headers.length; j++) {
+      obj[headers[j]] = values[j] ? values[j].trim() : '';
+      // console.log(obj[headers[j]]);
+    }
+    result.push(obj);
+  }
+
+  return result;
 }
