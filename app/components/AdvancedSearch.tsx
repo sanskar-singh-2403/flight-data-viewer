@@ -41,10 +41,11 @@ export default function AdvancedSearch() {
     debounce((criteria: SearchCriteria[], isAdvanced: boolean, simpleTerm: string) => {
       dispatch(performSearch({ criteria, isAdvanced, simpleTerm }));
     }, 300),
-    []
+    [dispatch]
   );
 
   useEffect(() => {
+    console.log("reached 2");
     debouncedSearch(searchCriteria, isAdvancedSearch, simpleSearchTerm);
   }, [searchCriteria, isAdvancedSearch, simpleSearchTerm, debouncedSearch]);
 
