@@ -3,7 +3,7 @@ import FlightTable from './components/FlightTable';
 import FileUpload from './components/FileUpload';
 
 export const metadata: Metadata = {
-  title: 'Flight Data Viewer',
+  title: 'Pretectum | Flight Data Viewer',
   description: 'View and search flight data',
 };
 

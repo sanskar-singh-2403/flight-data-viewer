@@ -60,7 +60,7 @@ export default function FlightTable() {
 
   return (
     <div className="w-full overflow-hidden">
-      <Title level={2} className="mb-4 text-center">Flight Information</Title>
+      <Title level={2} className="mb-4 text-center">Flights Information</Title>
       <Card className="mb-4 shadow-md">
         <AdvancedSearch />
       </Card>
