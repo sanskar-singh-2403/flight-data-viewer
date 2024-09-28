@@ -82,7 +82,7 @@ export default function FileUpload() {
       </p>
       <p className="ant-upload-text">Click or drag & drop a file to this area to upload</p>
       <p className="ant-upload-hint">
-        Upload a JSON or CSV file containing flight data.
+        Upload a JSON or CSV file containing flight data with all the necessary fields.
       </p>
     </Dragger>
   );
