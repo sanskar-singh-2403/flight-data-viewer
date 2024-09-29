@@ -91,17 +91,43 @@ export default function FileUpload() {
 
 
 function parseCSV(csv: string): CSVRow[] {
-  const lines: string[] = csv.split('\n');
-  const headers: string[] = lines[0].split(',').map(header => header.trim());
+  const lines = csv.split('\n');
+  const headers = lines[0].split(',').map(header => header.trim());
   const result: CSVRow[] = [];
 
-  for (let i: number = 1; i < lines.length; i++) {
-    const values: string[] = lines[i].split(',');
+  for (let i = 1; i < lines.length; i++) {
     const obj: CSVRow = {};
-    for (let j: number = 0; j < headers.length; j++) {
-      obj[headers[j]] = values[j] ? values[j].trim() : '';
-      // console.log(obj[headers[j]]);
+    let currentPosition = 0;
+    let fieldIndex = 0;
+
+    while (currentPosition < lines[i].length && fieldIndex < headers.length) {
+      let value: string;
+      if (lines[i][currentPosition] === '"') {
+        const endQuotePosition = lines[i].indexOf('"', currentPosition + 1);
+        // console.log(endQuotePosition);
+        value = lines[i].slice(currentPosition + 1, endQuotePosition);
+        currentPosition = lines[i].indexOf(',', endQuotePosition) + 1 || lines[i].length;
+      } else {
+        const nextCommaPosition = lines[i].indexOf(',', currentPosition);
+        // console.log(nextCommaPosition);
+        if (nextCommaPosition === -1) {
+          value = lines[i].slice(currentPosition).trim();
+          currentPosition = lines[i].length;
+        } else {
+          value = lines[i].slice(currentPosition, nextCommaPosition).trim();
+          currentPosition = nextCommaPosition + 1;
+        }
+      }
+
+      obj[headers[fieldIndex]] = value;
+      fieldIndex++;
     }
+
+    while (fieldIndex < headers.length) {
+      obj[headers[fieldIndex]] = '';
+      fieldIndex++;
+    }
+
     result.push(obj);
   }
 

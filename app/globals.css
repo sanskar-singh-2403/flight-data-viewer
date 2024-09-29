@@ -25,3 +25,27 @@ body {
     text-wrap: balance;
   }
 }
+
+.responsive-table .ant-table-row-expand-icon-cell {
+  width: 60px;
+  min-width: 60px;
+}
+
+.responsive-table .ant-table-expanded-row > .ant-table-cell {
+  padding: 16px !important;
+}
+
+.responsive-table .ant-table-expanded-row .ant-card-body {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.responsive-table .ant-table-expanded-row .ant-typography {
+  margin-right: 8px;
+}
+
+@media screen and (max-width: 640px) {
+  .responsive-table .ant-table-content {
+    overflow-x: auto;
+  }
+}

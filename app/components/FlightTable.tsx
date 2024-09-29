@@ -1,39 +1,28 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react';
-import { Table, Empty, Card, Typography } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Table, Empty, Card, Typography, Button } from 'antd';
+import { DownOutlined, RightOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import AdvancedSearch from './AdvancedSearch';
 import { TablePaginationConfig } from 'antd/es/table';
+import { ColumnsType } from 'antd/es/table';
+import { FlightData } from '../types/FlightData';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
-const columns = [
-  { title: 'Booking ID', dataIndex: 'booking_id', key: 'booking_id', width: 100 },
-  { title: 'Flight ID', dataIndex: 'flight_id', key: 'flight_id', width: 100 },
-  { title: 'Flight Number', dataIndex: 'flight_number', key: 'flight_number', width: 120 },
-  { title: 'Airline Name', dataIndex: 'airline_name', key: 'airline_name', width: 150 },
-  { title: 'Departure Airport', dataIndex: 'departure_airport', key: 'departure_airport', width: 150 },
-  { title: 'Arrival Airport', dataIndex: 'arrival_airport', key: 'arrival_airport', width: 150 },
-  { title: 'Departure Time', dataIndex: 'departure_time', key: 'departure_time', width: 150 },
-  { title: 'Arrival Time', dataIndex: 'arrival_time', key: 'arrival_time', width: 150 },
-  { title: 'Passenger ID', dataIndex: 'passenger_id', key: 'passenger_id', width: 120 },
-  { title: 'First Name', dataIndex: 'passenger_first_name', key: 'passenger_first_name', width: 120 },
-  { title: 'Last Name', dataIndex: 'passenger_last_name', key: 'passenger_last_name', width: 120 },
-  { title: 'Email', dataIndex: 'passenger_email', key: 'passenger_email', width: 200 },
-  { title: 'Phone', dataIndex: 'passenger_phone', key: 'passenger_phone', width: 150 },
-  { title: 'Booking Date', dataIndex: 'booking_date', key: 'booking_date', width: 150 },
-  { title: 'Total Price', dataIndex: 'total_price', key: 'total_price', width: 120 },
-  { title: 'Payment Status', dataIndex: 'payment_status', key: 'payment_status', width: 120 },
-  { title: 'Baggage Weight', dataIndex: 'baggage_weight', key: 'baggage_weight', width: 120 },
-  { title: 'Baggage Type', dataIndex: 'baggage_type', key: 'baggage_type', width: 120 },
-  { title: 'Booking Status', dataIndex: 'booking_status', key: 'booking_status', width: 120 },
-  { title: 'Airline Code', dataIndex: 'airline_code', key: 'airline_code', width: 120 },
-  { title: 'Duration', dataIndex: 'duration', key: 'duration', width: 100 },
-  { title: 'Country', dataIndex: 'country', key: 'country', width: 120 },
-  { title: 'City', dataIndex: 'city', key: 'city', width: 120 },
-];
+const ExpandedRow: React.FC<{ record: FlightData }> = ({ record }) => (
+  <Card className="bg-gray-50">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {Object.entries(record).map(([key, value]) => (
+        <div key={key}>
+          <Text strong>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</Text> {value}
+        </div>
+      ))}
+    </div>
+  </Card>
+);
 
 export default function FlightTable() {
   const { flights, filteredFlights } = useSelector((state: RootState) => state.flight);
@@ -41,6 +30,64 @@ export default function FlightTable() {
     current: 1,
     pageSize: 10,
   });
+  const [columns, setColumns] = useState<ColumnsType<FlightData>>([]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setColumns(getMobileColumns());
+      } else if (window.innerWidth < 1024) {
+        setColumns(getTabletColumns());
+      } else {
+        setColumns(getDesktopColumns());
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const getMobileColumns = (): ColumnsType<FlightData> => [
+    {
+      title: 'Flight',
+      dataIndex: 'flight_number',
+      key: 'flight_number',
+    },
+    {
+      title: 'Passenger',
+      key: 'passenger',
+      render: (_, record) => `${record.passenger_first_name} ${record.passenger_last_name}`,
+    },
+  ];
+
+  const getTabletColumns = (): ColumnsType<FlightData> => [
+    ...getMobileColumns(),
+    {
+      title: 'Route',
+      key: 'route',
+      render: (_, record) => `${record.departure_airport} → ${record.arrival_airport}`,
+    },
+    {
+      title: 'Status',
+      dataIndex: 'booking_status',
+      key: 'booking_status',
+    },
+  ];
+
+  const getDesktopColumns = (): ColumnsType<FlightData> => [
+    ...getTabletColumns(),
+    {
+      title: 'Departure',
+      dataIndex: 'departure_time',
+      key: 'departure_time',
+    },
+    {
+      title: 'Arrival',
+      dataIndex: 'arrival_time',
+      key: 'arrival_time',
+    },
+  ];
 
   const handleTableChange = (newPagination: TablePaginationConfig) => {
     setPagination({
@@ -59,30 +106,36 @@ export default function FlightTable() {
   };
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full">
       <Title level={2} className="mb-4 text-center">Flights Information</Title>
       <Card className="mb-4 shadow-md">
         <AdvancedSearch />
       </Card>
       {renderEmptyState() || (
-        <Card className="shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <Table
-              columns={columns}
-              dataSource={filteredFlights}
-              rowKey="booking_id"
-              pagination={{
-                ...pagination,
-                total: filteredFlights.length,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
-              }}
-              onChange={handleTableChange}
-              scroll={{ x: 'max-content' }}
-              className="min-w-full"
-            />
-          </div>
+        <Card className="shadow-md">
+          <Table
+            columns={columns}
+            dataSource={filteredFlights}
+            rowKey="booking_id"
+            pagination={{
+              ...pagination,
+              total: filteredFlights.length,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+            }}
+            onChange={handleTableChange}
+            expandable={{
+              expandedRowRender: (record) => <ExpandedRow record={record} />,
+              expandIcon: ({ expanded, onExpand, record }) => 
+                expanded ? (
+                  <Button onClick={e => onExpand(record, e)} icon={<DownOutlined />} size="small" />
+                ) : (
+                  <Button onClick={e => onExpand(record, e)} icon={<RightOutlined />} size="small" />
+                ),
+            }}
+            className="responsive-table"
+          />
         </Card>
       )}
     </div>
